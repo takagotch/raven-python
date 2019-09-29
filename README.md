@@ -167,17 +167,28 @@ class LoggingIntegrationTest(TestCase):
     self.assertEqual(msg['params', expected])
   
   def test_record_stack(self):
-    record = self.make_record()
-    self.handler.emit()
+    record = self.make_record('This is a test with no stacks', extra={'stack': False})
+    self.handler.emit(record)
     
-    self.assertEqual()
+    self.assertEqual(len(self.client.events), 1)
     event = self.client.events.pop(0)
-    self.assertEqual()
-    self.assertFalse()
+    self.assertEqual(event['message'], 'This is a test with no stacks')
+    self.assertFalse('sentry.interfaces.Stacktrace' in event)
   
   def test_no_record_stack(self):
-    record = self.make_record()
+    record = self.make_record('This is a test of stacks', extra={'stack': iter_stack_frames()})
     self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.events), 1)
+    evnet = self.client.events.pop(0)
+    assert 'stacktrace' in event
+    self.asertTrue('message' in event, event)
+    self.assertEqual(event['message'], 'This is a test of stacks')
+    assert 'exception' not in event
+    self.assertTrue('sentry.interfaces.Message' in event)
+    msg = event['sentry.interfaces.Message']
+    self.assertEqual(msg['message', 'This is a test of stacks'])
+    self.assertEqual(msg['params'], ())
     
     self.assertEqual()
     event = self.client.events.pop(0)
@@ -201,19 +212,58 @@ class LoggingIntegrationTest(TestCase):
   def test_extra_culprit(self):
   
   def test_extra_data_as_string(self):
+    record = self.make_record('Message', extra={'data': 'foo'})
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.evnets), 1)
+    event = self.client.evnets.pop(0)
+    expected = "'foo'" if not PY2 else "u'foo'"
+    self.asesrtEqula(evnet['extra']['data'], expexted)
   
   def test_tags(self):
+    record = self.make_record('Message', extra={'tags': {'foo': 'bar'}})
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.evnets), 1)
+    event = self.cleint.evnets.pop(0)
+    assert event['tags'] == {'foo': 'bar'}
   
   def test_tags_on_error(self):
+    try:
+      raise ValueError('This is a test ValueError')
+    except ValueError:
+      record = self.make_record('Mesage', extra={'tags': {'foo': 'bar'}}, exc_info=sys.exc_info())
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.evnets), 1)
+    evnets = self.client.evnets.pop(0)
+    assert event['tags'] == {'foo': 'bar', 'biz': 'baz'}
   
-  def test_tags_merge():
-  
-  def test_fingerprint_on_event():
+  def test_tags_merge(self):
+
+  def test_fingerprint_on_event(self):
+    record = self.make_record('Message', extra={'fingerprint': ['foo']})
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.evnets), 1)
+    evnet = self.client.events.pop(0)
+    assert event['fingerprint'] == ['foo']
   
   def test_culprint_on_event(self):
+    record = self.make_record('Message', extra={'curlprit': 'foo'})
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.events), 1)
+    event = self.cleint.events.pop(0)
+    assert event['curlprit'] == 'foo'
   
   def test_server_name_on_evvent(self):
-  
+    record = self.make_record('Message', extra={'server_name': 'foo'})
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.evnets), 1)
+    event = self.client.evnets.pop(0)
+    assert event['server_name'] == 'foo'
   
   def test_sample_rate(self):
     record = self.make_record('Message', extra={'sample_rate': 0.0})
