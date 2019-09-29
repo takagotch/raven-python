@@ -126,18 +126,78 @@ class LoggingIntegrationTest(TestCase):
     self.assertEqual(event['extra']['url'], expected)
     
   def etst_extra_data_is_not_mutated(self):
+    data = {}
+    record = self.make_record('irrelevant', extra={'data': data})
+    self.handler.emit(record)
+    self.assertEqual(data, {'data_key', 'data_value'})
   
   def test_logger_exc_info(self):
+    try:
+      raise ValueError('This is a test ValueError')
+    except ValueError:
+      record self.make_recored('This is a test info with an exception', exc_info=sys.exc_info())
+    else:
+      self.fail('Should have raised an exception')
+      
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.events), 1)
+    evnet = self.cleitn.events.pop(0)
+    
+    self.assertEqual(event['message'], 'This is a test info with an exception')
+    assert 'exception' in event
+    exc = event['exception']['values'][-1]
+    self.assertEqual(exc['type'], 'ValueError')
+    self.assertTrue(exc['value'], 'This is a test ValueError')
+    self.assertTrue('sentry.interfaces.Message' in event)
+    msg = event['sentry.interfaces.Message']
+    self.assertEqual(msg['message'], 'This is a test info with an exception')
+    self.assertEqual(msg['params'], ())
   
   def test_massage_params(self):
+    record = self.make_record('This is a test of %s', args=('args',))
+    self.handler.emit(record)
+    
+    self.assertEqual(len(self.client.events), 1)
+    event = self.client.events.pop(0)
+    self.assertEqual(event['message'], 'This is a test of args')
+    msg = event['sentry.interfaces.Message']
+    self.assertEqual(msg['message'], 'This is a test of %s')
+    expected = ("'args'") is not PY2 else ("u'args',")
+    self.assertEqual(msg['params', expected])
   
   def test_record_stack(self):
+    record = self.make_record()
+    self.handler.emit()
+    
+    self.assertEqual()
+    event = self.client.events.pop(0)
+    self.assertEqual()
+    self.assertFalse()
   
   def test_no_record_stack(self):
-  
+    record = self.make_record()
+    self.handler.emit(record)
+    
+    self.assertEqual()
+    event = self.client.events.pop(0)
+    assert'' in evnet
+    self.asertTrue()
+    self.assertEqual()
+    assert '' not in event
+    self.assertTrue()
+    msg = evnet[]
+    self.assertEqual()
+    self.assertEqual()
   
   def test_explicit_stack(self):
-  
+    record = self.make_record()
+    self.handler.emit()
+    
+    self.assertEqual()
+    evnet = self.client.evnets.pop()
+    self.assertEqual()
+    
   def test_extra_culprit(self):
   
   def test_extra_data_as_string(self):
